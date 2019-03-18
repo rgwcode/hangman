@@ -3,17 +3,60 @@
 #include <stdlib.h>
 #define MAX_MISTAKES 9
 
-// TODO: Make a proper graphical representation
-const static char *stages[] = {
-  "9 tries left",
-  "8 tries left",
-  "7 tries left",
-  "5 tries left",
-  "4 tries left",
-  "3 tries left",
-  "2 tries left",
-  "1 tries left",
-  "0 tries left",
+const static char *stages[] = {"\
+   .\n\
+   |\n\
+   |\n\
+   |\n\
+   |",
+  "\
+   .-.\n\
+   |\n\
+   |\n\
+   |\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   |\n\
+   |\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   |\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   | |\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   |-|\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   |-|-\n\
+   |",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   |-|-\n\
+   |/",
+  "\
+   .-.\n\
+   | |\n\
+   | O\n\
+   |-|-\n\
+   |/ \\",
 };
 
 // TODO: Choose a random word from a text file
@@ -24,9 +67,11 @@ char* get_wordpointer() {
 }
 
 void display_hangman(int mistakes) {
-  printf("%s\n", stages[mistakes]);
+  printf("\
+Hang 'em high.\n\
+%s\n\
+--------------\n", stages[mistakes]);
 }
-
 
 void display_word(char* wordp) {
   printf("%s\n", wordp);
