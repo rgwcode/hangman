@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
+
 #define MAX_MISTAKES 9
 
 const static char *stages[] = {"\
@@ -9,55 +11,55 @@ const static char *stages[] = {"\
    \n\
    \n\
    ",
-"\
+			       "\
    .\n\
    |\n\
    |\n\
    |\n\
    |",
-  "\
+			       "\
    .-.\n\
    |\n\
    |\n\
    |\n\
    |",
-  "\
-   .-.\n\
-   | |\n\
-   |\n\
-   |\n\
-   |",
-  "\
+			       "\
    .-.\n\
    | |\n\
-   | O\n\
+   |\n\
    |\n\
    |",
-  "\
+			       "\
    .-.\n\
    | |\n\
    | O\n\
+   |\n\
+   |",
+			       "\
+   .-.\n\
+   | |\n\
+   | O\n\
    | |\n\
    |",
-  "\
+			       "\
    .-.\n\
    | |\n\
    | O\n\
    |-|\n\
    |",
-  "\
+			       "\
    .-.\n\
    | |\n\
    | O\n\
    |-|-\n\
    |",
-  "\
+			       "\
    .-.\n\
    | |\n\
    | O\n\
    |-|-\n\
    |/",
-  "\
+			       "\
    .-.\n\
    | |\n\
    | O\n\
@@ -90,36 +92,63 @@ void obfuscate(char *wp) {
   }
 }
 
-// TODO: Implement this
+
+void flush() {
+  while(getchar() != '\n')
+    ;
+}
+
+//TODO: Add check for already guessed characters
 char get_player_guess() {
-  printf("Take your guess: ");
-  getchar();
-  // Get input
-  printf("\n");
-  return 'x';
+  char c = 0;
+  while(c == 0) {
+    printf("Take your guess: ");
+    c = getchar();
+    flush();
+
+    if(!isalpha(c)) {
+      printf("Please enter a valid character.\n");
+      c = 0;
+    }
+  }
+  return tolower(c);
 }
 
-int guess(char guess, char *word) {
-  return 1;
+int guess(char guessed_char, char word[], char *obfuscated_word) {
+  int hits = 0;
+  for(int i = 0; word[i] != '\0'; i++) {
+    if(word[i] == guessed_char) {
+      obfuscated_word[i] = guessed_char;
+      hits++;
+    }
+  }
+  return hits;
 }
-
 
 int main() {
   char *originalwp = get_wordpointer();
   int mistakes = 0;
 
-  // make a copy of the original word and obfuscate it
   char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
   strcpy(obfuscatedwp, originalwp);
+
   obfuscate(obfuscatedwp);
 
-
-  while(mistakes < MAX_MISTAKES) {
+  while(mistakes < MAX_MISTAKES && (strcmp(originalwp,obfuscatedwp) != 0)) {
     display_word(obfuscatedwp);
     char player_guess = get_player_guess();
-    mistakes = mistakes + guess(player_guess, obfuscatedwp);
+
+    if(guess(player_guess,originalwp, obfuscatedwp) == 0) {
+      mistakes++;
+    }
+
     display_hangman(mistakes);
   }
+
+  if(mistakes >= MAX_MISTAKES)
+    printf("You lose!\n");
+  else
+    printf("You win!\n");
 
   return 0;
 }
