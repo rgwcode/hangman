@@ -4,6 +4,12 @@
 #define MAX_MISTAKES 9
 
 const static char *stages[] = {"\
+   \n\
+   \n\
+   \n\
+   \n\
+   ",
+"\
    .\n\
    |\n\
    |\n\
@@ -68,13 +74,13 @@ char* get_wordpointer() {
 
 void display_hangman(int mistakes) {
   printf("\
-Hang 'em high.\n\
+--------------\n\
 %s\n\
 --------------\n", stages[mistakes]);
 }
 
 void display_word(char* wordp) {
-  printf("%s\n", wordp);
+  printf("[%s]\n", wordp);
 }
 
 void obfuscate(char *wp) {
@@ -85,8 +91,18 @@ void obfuscate(char *wp) {
 }
 
 // TODO: Implement this
-void get_player_guess() {
+char get_player_guess() {
+  printf("Take your guess: ");
+  getchar();
+  // Get input
+  printf("\n");
+  return 'x';
 }
+
+int guess(char guess, char *word) {
+  return 1;
+}
+
 
 int main() {
   char *originalwp = get_wordpointer();
@@ -99,11 +115,10 @@ int main() {
 
 
   while(mistakes < MAX_MISTAKES) {
-    display_hangman(mistakes);
     display_word(obfuscatedwp);
-    get_player_guess();
-    //TODO: Remove this
-    mistakes++;
+    char player_guess = get_player_guess();
+    mistakes = mistakes + guess(player_guess, obfuscatedwp);
+    display_hangman(mistakes);
   }
 
   return 0;
