@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #define MAX_MISTAKES 9
+#define WORDS_FILE "words.txt"
 
 const static char *stages[] = {"\
    \n\
@@ -67,8 +68,23 @@ const static char *stages[] = {"\
    |/ \\",
 };
 
+void flush() {
+  while(getchar() != '\n')
+    ;
+}
+
+int count_lines(FILE *fp) {
+  int lines = 0;
+  char c;
+  while((c = getc(fp)) != EOF) {
+    if(c == '\n')
+      lines++;
+  }
+  return lines;
+}
+
 // TODO: Choose a random word from a text file
-char* get_wordpointer() {
+char* get_word() {
   static char word[] = "motorcycle";
   char *wp = &word[0];
   return wp;
@@ -90,12 +106,6 @@ void obfuscate(char *wp) {
     *wp = '_';
     wp++;
   }
-}
-
-
-void flush() {
-  while(getchar() != '\n')
-    ;
 }
 
 //TODO: Add check for already guessed characters
@@ -126,7 +136,16 @@ int guess(char guessed_char, char word[], char *obfuscated_word) {
 }
 
 int main() {
-  char *originalwp = get_wordpointer();
+  FILE *fp = fopen(WORDS_FILE, "r");
+
+  if(fp == NULL) {
+    fprintf(stderr, "Error: cannot open words file.");
+    return 1;
+  }
+
+
+
+  char *originalwp = get_word();
   int mistakes = 0;
 
   char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
