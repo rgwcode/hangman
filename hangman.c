@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 
 #define MAX_MISTAKES 9
 #define WORDS_FILE "words.txt"
@@ -74,33 +75,33 @@ void flush() {
     ;
 }
 
-int count_lines(FILE *fp) {
-  int lines = 0;
+uint count_lines(FILE *fp) {
+  uint lines = 0;
   char c;
   while((c = getc(fp)) != EOF) {
     if(c == '\n')
       lines++;
   }
+
   fseek(fp,0, SEEK_SET);
   return lines;
 }
 
-// TODO: Choose a random word from a text file
-char* pick_random_word(char** words) {
-  return words[1];
+char* pick_random_word(char** words, uint lines) {
+  uint pick = (rand() / (RAND_MAX / (lines - 1)));
+  return words[pick];
 }
 
-char** get_words_from_file(FILE *fp) {
-  int lines = count_lines(fp);
+char** get_words_from_file(FILE *fp, uint lines) {
   char **words = malloc(lines * sizeof(char*));
-  for (int i = 0; i < lines; i++) {
+  for (uint i = 0; i < lines; i++) {
     words[i] = malloc(LONGEST_WORD * sizeof(char));
     fscanf(fp, "%s", words[i]);
   }
   return words;
 }
 
-void display_hangman(int mistakes) {
+void display_hangman(uint mistakes) {
   printf("\
 --------------\n\
 %s\n\
@@ -135,7 +136,7 @@ char get_player_guess() {
 }
 
 int guess(char guessed_char, char word[], char *obfuscated_word) {
-  int hits = 0;
+  uint hits = 0;
   for(int i = 0; word[i] != '\0'; i++) {
     if(word[i] == guessed_char) {
       obfuscated_word[i] = guessed_char;
@@ -146,6 +147,7 @@ int guess(char guessed_char, char word[], char *obfuscated_word) {
 }
 
 int main() {
+  srand(time(NULL));
   FILE *fp = fopen(WORDS_FILE, "r");
 
   if(fp == NULL) {
@@ -153,11 +155,12 @@ int main() {
     return 1;
   }
 
-  char** words = get_words_from_file(fp);
+  uint lines = count_lines(fp);
+  char** words = get_words_from_file(fp, lines);
   fclose(fp);
 
-  char *originalwp = pick_random_word(words);
-  int mistakes = 0;
+  char *originalwp = pick_random_word(words, lines);
+  uint mistakes = 0;
 
   char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
   strcpy(obfuscatedwp, originalwp);
@@ -171,15 +174,15 @@ int main() {
     if(guess(player_guess,originalwp, obfuscatedwp) == 0) {
       mistakes++;
     }
-
     display_hangman(mistakes);
   }
 
   if(mistakes >= MAX_MISTAKES) {
-    printf("You lose!\nThe word was:\n[%s]\n", originalwp);
+    printf("You lose!\n");
   }
   else {
     printf("You win!\n");
   }
+  printf("The word was:\n[%s]\n", originalwp);
   return 0;
 }
