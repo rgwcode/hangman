@@ -135,6 +135,29 @@ char get_player_guess() {
   return tolower(c);
 }
 
+int play_again() {
+  char c = 0;
+  int playagain = 2;
+
+  printf("Do you want to play again?\ny/n: ");
+  while(playagain == 2) {
+    c = getchar();
+    flush();
+
+    switch (c) {
+    case 'y':
+      playagain = 1;
+      break;
+    case 'n':
+      playagain = 0;
+      break;
+    default:
+      printf("Please answer y or n: ");
+    }
+  }
+  return playagain;
+}
+
 int guess(char guessed_char, char word[], char *obfuscated_word) {
   uint hits = 0;
   for(int i = 0; word[i] != '\0'; i++) {
@@ -158,31 +181,36 @@ int main() {
   uint lines = count_lines(fp);
   char** words = get_words_from_file(fp, lines);
   fclose(fp);
+  int playing = 1;
+  while(playing) {
+    char *originalwp = pick_random_word(words, lines);
+    uint mistakes = 0;
 
-  char *originalwp = pick_random_word(words, lines);
-  uint mistakes = 0;
+    char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
+    strcpy(obfuscatedwp, originalwp);
 
-  char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
-  strcpy(obfuscatedwp, originalwp);
+    obfuscate(obfuscatedwp);
 
-  obfuscate(obfuscatedwp);
+    while(mistakes < MAX_MISTAKES && (strcmp(originalwp,obfuscatedwp) != 0)) {
+      display_word(obfuscatedwp);
+      char player_guess = get_player_guess();
 
-  while(mistakes < MAX_MISTAKES && (strcmp(originalwp,obfuscatedwp) != 0)) {
-    display_word(obfuscatedwp);
-    char player_guess = get_player_guess();
-
-    if(guess(player_guess,originalwp, obfuscatedwp) == 0) {
-      mistakes++;
+      if(guess(player_guess,originalwp, obfuscatedwp) == 0) {
+	mistakes++;
+      }
+      display_hangman(mistakes);
     }
-    display_hangman(mistakes);
-  }
 
-  if(mistakes >= MAX_MISTAKES) {
-    printf("You lose!\n");
+    if(mistakes >= MAX_MISTAKES) {
+      printf("You lose!\n");
+    }
+    else {
+      printf("You win!\n");
+    }
+    printf("The word was:\n[%s]\n", originalwp);
+    free(obfuscatedwp);
+    playing = play_again();
   }
-  else {
-    printf("You win!\n");
-  }
-  printf("The word was:\n[%s]\n", originalwp);
+  printf("Thanks for playing!\n");
   return 0;
 }
