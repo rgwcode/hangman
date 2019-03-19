@@ -5,67 +5,68 @@
 
 #define MAX_MISTAKES 9
 #define WORDS_FILE "words.txt"
+#define LONGEST_WORD 50
 
 const static char *stages[] = {"\
-   \n\
-   \n\
-   \n\
-   \n\
-   ",
-			       "\
-   .\n\
-   |\n\
-   |\n\
-   |\n\
-   |",
-			       "\
-   .-.\n\
-   |\n\
-   |\n\
-   |\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   |\n\
-   |\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   |\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   | |\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   |-|\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   |-|-\n\
-   |",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   |-|-\n\
-   |/",
-			       "\
-   .-.\n\
-   | |\n\
-   | O\n\
-   |-|-\n\
-   |/ \\",
+\n\
+\n\
+\n\
+\n\
+",
+"\
+.\n\
+|\n\
+|\n\
+|\n\
+|",
+"\
+.-.\n\
+|\n\
+|\n\
+|\n\
+|",
+"\
+.-.\n\
+| |\n\
+|  \n\
+|  \n\
+|",
+"\
+.-.\n\
+| |\n\
+| O\n\
+|  \n\
+|",
+"\
+.-.\n\
+| |\n\
+| O\n\
+| |\n\
+|",
+"\
+.-.\n\
+| |\n\
+| O\n\
+|-|\n\
+|",
+"\
+.-.\n\
+| |\n\
+| O\n\
+|-|-\n\
+|",
+"\
+.-.\n\
+| |\n\
+| O\n\
+|-|-\n\
+|/",
+"\
+.-.\n\
+| |\n\
+| O\n\
+|-|-\n\
+|/ \\",
 };
 
 void flush() {
@@ -80,14 +81,23 @@ int count_lines(FILE *fp) {
     if(c == '\n')
       lines++;
   }
+  fseek(fp,0, SEEK_SET);
   return lines;
 }
 
 // TODO: Choose a random word from a text file
-char* get_word() {
-  static char word[] = "motorcycle";
-  char *wp = &word[0];
-  return wp;
+char* pick_random_word(char** words) {
+  return words[1];
+}
+
+char** get_words_from_file(FILE *fp) {
+  int lines = count_lines(fp);
+  char **words = malloc(lines * sizeof(char*));
+  for (int i = 0; i < lines; i++) {
+    words[i] = malloc(LONGEST_WORD * sizeof(char));
+    fscanf(fp, "%s", words[i]);
+  }
+  return words;
 }
 
 void display_hangman(int mistakes) {
@@ -143,9 +153,10 @@ int main() {
     return 1;
   }
 
+  char** words = get_words_from_file(fp);
+  fclose(fp);
 
-
-  char *originalwp = get_word();
+  char *originalwp = pick_random_word(words);
   int mistakes = 0;
 
   char *obfuscatedwp = (char*)malloc(strlen(originalwp)*sizeof(char));
@@ -164,10 +175,11 @@ int main() {
     display_hangman(mistakes);
   }
 
-  if(mistakes >= MAX_MISTAKES)
-    printf("You lose!\n");
-  else
+  if(mistakes >= MAX_MISTAKES) {
+    printf("You lose!\nThe word was:\n[%s]\n", originalwp);
+  }
+  else {
     printf("You win!\n");
-
+  }
   return 0;
 }
